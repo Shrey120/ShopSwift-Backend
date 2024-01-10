@@ -5,6 +5,7 @@ const {
   fetchSingleProduct,
   orderCartProducts,
   storeOrders,
+  contactDetails,
   getOrders,
 } = require("../controllers/product");
 
@@ -15,6 +16,12 @@ router.get("/products", fetchAllProducts);
 router.get("/products/:id", fetchSingleProduct);
 
 router.post("/cart/create-checkout", orderCartProducts);
+
+router.post("/contact", contactDetails);
+
+router.post("/storeOrders", isLoggedIn, storeOrders);
+
+router.get("/orders", isLoggedIn, getOrders);
 
 router.post("/storeOrders", isLoggedIn, storeOrders);
 
