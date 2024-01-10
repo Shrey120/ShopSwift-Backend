@@ -1,5 +1,6 @@
 const Products = require("../models/product");
 const SingleProduct = require("../models/singleproduct");
+const ContactUS = require("../models/contact");
 
 require("dotenv").config();
 const stripe = require("stripe")(process.env.SECRET_KEY);
@@ -24,6 +25,30 @@ const fetchSingleProduct = (req, res) => {
     .catch((err) =>
       res.status(500).json({ success: false, message: err.message })
     );
+};
+
+const contactDetails = async (req, res) => {
+  try {
+    const { name, email, query } = req.body;
+
+    const contactData = await ContactUS.create({
+      name,
+      email,
+      query,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: contactData,
+      message: "Query Send",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      error: "internal error",
+    });
+  }
 };
 
 const orderCartProducts = async (req, res) => {
@@ -227,4 +252,5 @@ module.exports = {
   orderCartProducts,
   storeOrders,
   getOrders,
+  contactDetails,
 };
