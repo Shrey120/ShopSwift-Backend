@@ -207,8 +207,8 @@ const orderCartProducts = async (req, res) => {
         message: "We'll email you instructions on how to get started.",
       },
     },
-    success_url: "https://shop-swift.netlify.app/",
-    cancel_url: "https://shop-swift.netlify.app/",
+    success_url: "https://shopswiftely.netlify.app/",
+    cancel_url: "https://shopswiftely.netlify.app/",
   });
   res.status(200).json({ id: session.id });
 };
