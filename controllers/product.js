@@ -1,30 +1,17 @@
 const Products = require("../models/product");
-const SingleProduct = require("../models/singleproduct");
 const ContactUS = require("../models/contact");
+const Orders = require("../models/orders");
 
 require("dotenv").config();
 const stripe = require("stripe")(process.env.SECRET_KEY);
-const Orders = require("../models/orders");
 
-const fetchAllProducts = (req, res) => {
-  Products.find()
-    .then((products) =>
-      res.status(200).json({ success: true, products: products })
-    )
-    .catch((err) =>
-      res.status(500).json({ success: false, message: err.message })
-    );
-};
-
-const fetchSingleProduct = (req, res) => {
-  // const ProductID = req.params.id;
-  SingleProduct.find()
-    .then((product) =>
-      res.status(200).json({ success: true, product: product })
-    )
-    .catch((err) =>
-      res.status(500).json({ success: false, message: err.message })
-    );
+const fetchAllProducts = async (req, res) => {
+  try {
+    const products = await Products.find();
+    return res.status(200).json({ success: true, products: products });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
 const contactDetails = async (req, res) => {
@@ -43,8 +30,7 @@ const contactDetails = async (req, res) => {
       message: "Query Send",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "internal error",
     });
@@ -54,7 +40,6 @@ const contactDetails = async (req, res) => {
 const orderCartProducts = async (req, res) => {
   const cartItems = req.body;
   const product = cartItems.products;
-
   const lineItems = product.map((cartItem) => ({
     price_data: {
       currency: "inr",
@@ -199,6 +184,7 @@ const orderCartProducts = async (req, res) => {
         "US",
       ],
     },
+    billing_address_collection: "required",
     custom_text: {
       shipping_address: {
         message: "Your Order will be delievered in 2 working-days",
@@ -207,50 +193,68 @@ const orderCartProducts = async (req, res) => {
         message: "We'll email you instructions on how to get started.",
       },
     },
-    success_url: "https://shopswiftely.netlify.app/",
-    cancel_url: "https://shopswiftely.netlify.app/",
+    success_url: "http://localhost:3000",
+    cancel_url: "http://localhost:3000/cart",
   });
   res.status(200).json({ id: session.id });
 };
 
-const storeOrders = (req, res) => {
-  const { cartItems, sessionId } = req.body;
-  let transaction = new Orders({
-    cartItems,
-    user: req.user.id,
-    sessionId,
-  });
-
-  transaction
-    .save()
-    .then((result) =>
-      res
-        .status(200)
-        .json({ success: true, message: "Order Added Successfully" })
-    )
-    .catch((err) =>
-      res.status(500).json({
-        success: false,
-        message: err.message,
-      })
-    );
+const storeOrders = async (req, res) => {
+  try {
+    const { cartItems, sessionId, name, email, city, formattedDate } = req.body;
+    let transaction = await new Orders({
+      cartItems,
+      userName: name,
+      userEmail: email,
+      city: city,
+      date: formattedDate,
+      user: req.user.id,
+      sessionId,
+    });
+    const result = transaction.save();
+    return res
+      .status(200)
+      .json({ success: true, message: "Order Added Successfully" });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };
 
-const getOrders = (req, res) => {
-  Orders.find({ user: req.user.id })
-    .then((items) =>
-      res.status(200).json({ success: true, orderedItems: items })
-    )
-    .catch((err) =>
-      res.status(500).json({ success: false, message: err.message })
+const getOrders = async (req, res) => {
+  try {
+    const items = await Orders.find({ user: req.user.id });
+    return res.status(200).json({ success: true, orderedItems: items });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteOrders = async (req, res) => {
+  try {
+    const { id } = req.body;
+    // Update the cart in the database to remove the specified item
+    await Orders.findOneAndUpdate(
+      { "cartItems.id": id },
+      { $pull: { cartItems: { id: id } } }
     );
+
+    res
+      .status(200)
+      .json({ success: true, message: "Item deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 module.exports = {
   fetchAllProducts,
-  fetchSingleProduct,
   orderCartProducts,
   storeOrders,
   getOrders,
   contactDetails,
+  deleteOrders,
 };

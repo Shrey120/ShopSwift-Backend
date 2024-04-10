@@ -27,7 +27,6 @@ exports.signup = async (req, res) => {
       name,
       email,
       password: hashPassword,
-      role,
     });
 
     res.status(200).json({
@@ -68,7 +67,7 @@ exports.login = async (req, res) => {
     const payload = {
       email: userData.email,
       id: userData.id,
-      role: userData.role,
+      isAdmin: userData.isAdmin,
     };
     if (await bcrypt.compare(password, userData.password)) {
       // password match

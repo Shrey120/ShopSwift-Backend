@@ -12,4 +12,16 @@ const isLoggedIn = (req, res, next) => {
   }
 };
 
-module.exports = { isLoggedIn };
+const isAdmin = (req, res, next) => {
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ message: "Access only to Admin" });
+    }
+    next();
+  } catch (e) {
+    console.log("Error in admin middleware", e);
+    next(e);
+  }
+};
+
+module.exports = { isLoggedIn, isAdmin };

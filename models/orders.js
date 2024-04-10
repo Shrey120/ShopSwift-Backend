@@ -2,6 +2,22 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   cartItems: [],
+  userName: {
+    type: String,
+    required: true,
+  },
+  userEmail: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: String,
+    required: true,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -10,6 +26,11 @@ const orderSchema = new mongoose.Schema({
   sessionId: {
     type: String,
     required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "Ordered",
   },
 });
 

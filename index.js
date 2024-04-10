@@ -4,6 +4,7 @@ const app = express();
 
 const route = require("./routes/auth");
 const router = require("./routes/product");
+const adminRoute = require("./routes/admin");
 
 const dbConnect = require("./config/database");
 
@@ -14,6 +15,7 @@ require("dotenv").config();
 
 app.use(route);
 app.use(router);
+app.use("/admin", adminRoute);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listen on port ${process.env.PORT}`);
