@@ -193,8 +193,8 @@ const orderCartProducts = async (req, res) => {
         message: "We'll email you instructions on how to get started.",
       },
     },
-    success_url: "https://shopswiftely.netlify.app",
-    cancel_url: "https://shopswiftely.netlify.app/cart",
+    success_url: "https://shopswiftely.vercel.app/",
+    cancel_url: "https://shopswiftely.vercel.app//cart",
   });
   res.status(200).json({ id: session.id });
 };
